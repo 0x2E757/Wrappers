@@ -56,14 +56,14 @@ Simple wrapper that can be used as a value container with assignable on update c
 
 Usage example:
 ```typescript
-let mSomeValue = new StaticWrapper(0);
-mSomeValue.subscribe(console.log);
-mSomeValue.set(1);
-mSomeValue.applyMiddleware((next) => (value) => {
+let wSomeValue = new StaticWrapper(0);
+wSomeValue.subscribe(console.log);
+wSomeValue.set(1);
+wSomeValue.applyMiddleware((next) => (value) => {
     next(value > 5 ? 5 : value);
 });
-mSomeValue.set(10);
-let someValue = mSomeValue.emit();
+wSomeValue.set(10);
+let someValue = wSomeValue.emit();
 ```
 
 ### DynamicWrapper
@@ -72,11 +72,11 @@ Advanced wrapper which contains dynamically computed value (it can not be set ma
 
 Usage example:
 ```typescript
-let mUsername = new StaticWrapper("John");
-let mBalance = new StaticWrapper(100);
-let mBankAccountInfo = new DynamicWrapper(mUsername, mBalance, (username, balance) => `${username} has ${balance}$.`);
-mBankAccountInfo.subscribe(console.log, true);
-mBalance.set(mBalance.emit() - 50);
+let wUsername = new StaticWrapper("John");
+let wBalance = new StaticWrapper(100);
+let wBankAccountInfo = new DynamicWrapper(wUsername, wBalance, (username, balance) => `${username} has ${balance}$.`);
+wBankAccountInfo.subscribe(console.log, true);
+wBalance.set(wBalance.emit() - 50);
 // Console output:
 // > John has 100$.
 // > John has 50$.
