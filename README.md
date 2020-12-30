@@ -10,7 +10,7 @@ npm i @0x2e757/wrappers
 
 ## Usage
 
-Library contains two classes - `StaticWrapper` and` DynamicWrapper`, which are implementation of `IWrapper<T>` and `IComparable<T>` interfaces.
+Library contains two classes - `StaticWrapper` and` DynamicWrapper`, which are implementation of `IWrapper<T>` interface.
 
 ### How to import
 
@@ -18,10 +18,10 @@ Library contains two classes - `StaticWrapper` and` DynamicWrapper`, which are i
 import { IWrapper, StaticWrapper, DynamicWrapper } from "@0x2e757/wrappers";
 ```
 
-### IWrapper interface
+### IWrapper
 
 ```typescript
-export interface IWrapper<T> {
+interface IWrapper<T> extends IComparable<T> {
     set: (value: T) => void;
     setter: (value: T) => () => void;
     toggle: () => void;
@@ -35,10 +35,10 @@ export interface IWrapper<T> {
 
 <sub>\* Methods `set`, `setter`, `toggle` and `applyMiddleware` are available only on StaticWrapper instances. Calling them from DynamicWrapper instance results in exception.</sub>
 
-### IComparable interface
+### IComparable
 
 ```typescript
-export interface IComparable<T> {
+interface IComparable<T> {
     seq: (value: T) => boolean;  // Strict equality check
     sneq: (value: T) => boolean; // Strict inequality check
     eq: (value: T) => boolean;  // Equality check

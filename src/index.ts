@@ -5,18 +5,7 @@ type Wrappers<T> = T extends [] ? [] : { [K in keyof T]: Wrapper<T[K]> };
 type IWrappers<T> = T extends [] ? [] : { [K in keyof T]: IWrapper<T[K]> };
 type Middleware<T> = (next: (value: T) => void) => (value: T) => void;
 
-export interface IWrapper<T> {
-    set: (value: T) => void;
-    setter: (value: T) => () => void;
-    toggle: () => void;
-    emit: () => T;
-    subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;
-    unsubscribe: (callback: Subscriber<T>) => void;
-    applyMiddleware: (middleware: Middleware<T>) => void;
-    dispose: () => void;
-}
-
-export interface IComparable<T> {
+interface IComparable<T> {
     seq: (value: T) => boolean;
     sneq: (value: T) => boolean;
     eq: (value: T) => boolean;
@@ -27,7 +16,18 @@ export interface IComparable<T> {
     gte: (value: T) => boolean;
 }
 
-abstract class Wrapper<T> implements IWrapper<T>, IComparable<T> {
+export interface IWrapper<T> extends IComparable<T> {
+    set: (value: T) => void;
+    setter: (value: T) => () => void;
+    toggle: () => void;
+    emit: () => T;
+    subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;
+    unsubscribe: (callback: Subscriber<T>) => void;
+    applyMiddleware: (middleware: Middleware<T>) => void;
+    dispose: () => void;
+}
+
+abstract class Wrapper<T> implements IWrapper<T> {
 
     public abstract kind: Kind;
     public abstract value: T;
@@ -57,7 +57,7 @@ abstract class Wrapper<T> implements IWrapper<T>, IComparable<T> {
 
 }
 
-export class StaticWrapper<T> implements IWrapper<T>, IComparable<T> {
+export class StaticWrapper<T> implements IWrapper<T> {
 
     protected kind: Kind;
     protected value: T;
@@ -175,7 +175,7 @@ export class StaticWrapper<T> implements IWrapper<T>, IComparable<T> {
 
 }
 
-export class DynamicWrapper<T, U extends unknown[]> implements IWrapper<T>, IComparable<T> {
+export class DynamicWrapper<T, U extends unknown[]> implements IWrapper<T> {
 
     protected wrappers: Wrappers<U>;
     protected emitter: Emitter<T, U>;

@@ -13,17 +13,7 @@ declare type IWrappers<T> = T extends [] ? [] : {
     [K in keyof T]: IWrapper<T[K]>;
 };
 declare type Middleware<T> = (next: (value: T) => void) => (value: T) => void;
-export interface IWrapper<T> {
-    set: (value: T) => void;
-    setter: (value: T) => () => void;
-    toggle: () => void;
-    emit: () => T;
-    subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;
-    unsubscribe: (callback: Subscriber<T>) => void;
-    applyMiddleware: (middleware: Middleware<T>) => void;
-    dispose: () => void;
-}
-export interface IComparable<T> {
+interface IComparable<T> {
     seq: (value: T) => boolean;
     sneq: (value: T) => boolean;
     eq: (value: T) => boolean;
@@ -33,7 +23,17 @@ export interface IComparable<T> {
     gt: (value: T) => boolean;
     gte: (value: T) => boolean;
 }
-declare abstract class Wrapper<T> implements IWrapper<T>, IComparable<T> {
+export interface IWrapper<T> extends IComparable<T> {
+    set: (value: T) => void;
+    setter: (value: T) => () => void;
+    toggle: () => void;
+    emit: () => T;
+    subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;
+    unsubscribe: (callback: Subscriber<T>) => void;
+    applyMiddleware: (middleware: Middleware<T>) => void;
+    dispose: () => void;
+}
+declare abstract class Wrapper<T> implements IWrapper<T> {
     abstract kind: Kind;
     abstract value: T;
     abstract pending: boolean;
@@ -58,7 +58,7 @@ declare abstract class Wrapper<T> implements IWrapper<T>, IComparable<T> {
     abstract gt: (value: T) => boolean;
     abstract gte: (value: T) => boolean;
 }
-export declare class StaticWrapper<T> implements IWrapper<T>, IComparable<T> {
+export declare class StaticWrapper<T> implements IWrapper<T> {
     protected kind: Kind;
     protected value: T;
     protected pending: boolean;
@@ -87,7 +87,7 @@ export declare class StaticWrapper<T> implements IWrapper<T>, IComparable<T> {
     gt: (value: T) => boolean;
     gte: (value: T) => boolean;
 }
-export declare class DynamicWrapper<T, U extends unknown[]> implements IWrapper<T>, IComparable<T> {
+export declare class DynamicWrapper<T, U extends unknown[]> implements IWrapper<T> {
     protected wrappers: Wrappers<U>;
     protected emitter: Emitter<T, U>;
     protected kind: Kind;
