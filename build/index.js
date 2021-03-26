@@ -132,6 +132,7 @@ class DynamicWrapper {
                     case 5:
                         this.value = this.emitter(this.wrappers[0].emit(), this.wrappers[1].emit(), this.wrappers[2].emit(), this.wrappers[3].emit(), this.wrappers[4].emit());
                         break;
+                    default: this.value = this.emitter(...this.wrappers.map(wrapper => wrapper.emit()));
                 }
                 this.pending = !this.wrappers.length;
             }
