@@ -1,7 +1,27 @@
-import { Kind, Subscriber, Emitter, Wrappers, IWrappers, Middleware } from "./types";
-import { IWrapper, Wrapper } from "./types";
+import { ElementOf, IfPrimitive, IfNumber, IfString, IfArray, Kind, Subscriber, Emitter, Wrappers, IWrappers, Middleware } from "./types";
+import { IWrapperBase, IPrimitiveWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
+import { WrapperHelpers } from "./wrapperHelpers";
 
-export class DynamicWrapper<T, U extends unknown[]> implements IWrapper<T> {
+class WrapperHelpersExt<T> extends WrapperHelpers<T> {
+
+    protected isBooleanWrapper = (): this is Wrapper<boolean> => {
+        return typeof this.emit() === "boolean";
+    }
+
+    protected isNumberWrapper = (): this is Wrapper<number> => {
+        return typeof this.emit() === "number";
+    }
+
+    protected isStringWrapper = (): this is Wrapper<string> => {
+        return typeof this.emit() === "string";
+    }
+
+    protected isArrayWrapper = (): this is Wrapper<ElementOf<T>[]> => {
+        return Array.isArray(this.emit());
+    }
+}
+
+const dynamicWrapper = class <T, U extends unknown[]> extends WrapperHelpersExt<T> implements IWrapperBase<T> {
 
     protected wrappers: Wrappers<U>;
     protected emitter: Emitter<T, U>;
@@ -12,6 +32,7 @@ export class DynamicWrapper<T, U extends unknown[]> implements IWrapper<T> {
     protected dependencies: Set<Wrapper<any>>;
 
     public constructor(...args: [...wrappers: IWrappers<U>, emitter: Emitter<T, U>]) {
+        super();
         const emitter = args.pop();
         this.wrappers = args as unknown as Wrappers<U>;
         this.emitter = emitter as Emitter<T, U>;
@@ -20,23 +41,11 @@ export class DynamicWrapper<T, U extends unknown[]> implements IWrapper<T> {
         this.subscribers = new Set();
         this.dependencies = new Set();
         for (const wrapper of this.wrappers)
-            wrapper.dependencies.add(this as IWrapper<T> as Wrapper<T>);
+            wrapper.dependencies.add(this as IWrapperBase<T> as Wrapper<T>);
     }
 
     public get [Symbol.toStringTag](): string {
         return "DynamicWrapper";
-    }
-
-    public set = (value: T): never => {
-        throw new Error("Dynamic wrapper value cannot be set manually.");
-    }
-
-    public setter = (value: T): never => {
-        throw new Error("Dynamic wrapper value cannot be set manually.");
-    }
-
-    public toggle = (): never => {
-        throw new Error("Dynamic wrapper value cannot be toggled.");
     }
 
     public emit = (): T => {
@@ -105,39 +114,16 @@ export class DynamicWrapper<T, U extends unknown[]> implements IWrapper<T> {
         if (this.subscribers.size)
             console.warn("Disposing wrapper that has subscribers.");
         for (const wrapper of this.wrappers)
-            wrapper.dependencies.delete(this as IWrapper<T> as Wrapper<T>);
-    }
-
-    public seq = (value: T): boolean => {
-        return this.emit() === value;
-    }
-
-    public sneq = (value: T): boolean => {
-        return this.emit() !== value;
-    }
-
-    public eq = (value: T): boolean => {
-        return this.emit() == value;
-    }
-
-    public neq = (value: T): boolean => {
-        return this.emit() != value;
-    }
-
-    public lt = (value: T): boolean => {
-        return this.emit() < value;
-    }
-
-    public lte = (value: T): boolean => {
-        return this.emit() <= value;
-    }
-
-    public gt = (value: T): boolean => {
-        return this.emit() > value;
-    }
-
-    public gte = (value: T): boolean => {
-        return this.emit() >= value;
+            wrapper.dependencies.delete(this as IWrapperBase<T> as Wrapper<T>);
     }
 
 }
+
+export type IDynamicWrapper<T> =
+    & IWrapperBase<T>
+    & IfPrimitive<T, IPrimitiveWrapperHelpers<T>>
+    & IfNumber<T, INumberWrapperHelpers>
+    & IfString<T, IStringWrapperHelpers>
+    & IfArray<T, IArrayWrapperHelpers<T>>;
+
+export const DynamicWrapper: { new <T, U extends unknown[]>(...args: [...wrappers: IWrappers<U>, emitter: Emitter<T, U>]): IDynamicWrapper<T> } = dynamicWrapper as any;

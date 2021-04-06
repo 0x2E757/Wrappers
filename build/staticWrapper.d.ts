@@ -1,32 +1,29 @@
-import { Kind, Subscriber, Middleware } from "./types";
-import { IWrapper, Wrapper } from "./types";
-export declare class StaticWrapper<T> implements IWrapper<T> {
-    protected kind: Kind;
-    protected value: T;
-    protected pending: boolean;
-    protected subscribers: Set<Subscriber<T>>;
-    protected dependencies: Set<Wrapper<any>>;
-    protected middlewares: Middleware<T>[];
-    set: (value: T) => void;
-    constructor(value: T);
-    get [Symbol.toStringTag](): string;
-    protected assign: (value: T) => void;
-    setter: (value: T) => () => void;
-    toggle: () => void;
-    emit: () => T;
-    protected update: (kind: Kind) => never;
-    protected trigger: () => never;
-    subscribe: (subscriber: Subscriber<T>, triggerImmediately?: boolean) => void;
-    unsubscribe: (subscriber: Subscriber<T>) => void;
-    applyMiddleware: (middleware: Middleware<T>) => void;
-    dispose: () => void;
-    seq: (value: T) => boolean;
-    sneq: (value: T) => boolean;
-    eq: (value: T) => boolean;
-    neq: (value: T) => boolean;
-    lt: (value: T) => boolean;
-    lte: (value: T) => boolean;
-    gt: (value: T) => boolean;
-    gte: (value: T) => boolean;
+import { ElementOf, IfPrimitive, IfBoolean, IfNumber, IfString, IfArray, Middleware } from "./types";
+import { IWrapperBase, IPrimitiveWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers } from "./types";
+interface IWrapperBaseExt<T> extends IWrapperBase<T> {
+    readonly applyMiddleware: (middleware: Middleware<T>) => void;
+    readonly set: (value: T) => void;
+    readonly setter: (value: T) => () => void;
 }
+interface IBooleanWrapperHelpers {
+    readonly toggle: () => void;
+}
+interface INumberWrapperHelpersExt extends INumberWrapperHelpers {
+    readonly inc: (delta?: number) => void;
+    readonly dec: (delta?: number) => void;
+    readonly random: (min: number, max: number, integer?: boolean) => void;
+    readonly round: (fractionDigits?: number) => void;
+    readonly clamp: (min: number, max: number) => void;
+}
+interface IArrayWrapperHelpersExt<T> extends IArrayWrapperHelpers<T> {
+    readonly pop: () => ElementOf<T> | undefined;
+    readonly push: (...values: ElementOf<T>[]) => number;
+    readonly shift: () => ElementOf<T> | undefined;
+    readonly unshift: (...values: ElementOf<T>[]) => void;
+}
+export declare type IStaticWrapper<T> = IWrapperBaseExt<T> & IfPrimitive<T, IPrimitiveWrapperHelpers<T>> & IfBoolean<T, IBooleanWrapperHelpers> & IfNumber<T, INumberWrapperHelpersExt> & IfString<T, IStringWrapperHelpers> & IfArray<T, IArrayWrapperHelpersExt<T>>;
+export declare const StaticWrapper: {
+    new <T>(value: T): IStaticWrapper<T>;
+};
+export {};
 //# sourceMappingURL=staticWrapper.d.ts.map

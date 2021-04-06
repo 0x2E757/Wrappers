@@ -2,17 +2,27 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DynamicWrapper = void 0;
 const types_1 = require("./types");
-class DynamicWrapper {
+const wrapperHelpers_1 = require("./wrapperHelpers");
+class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
+    constructor() {
+        super(...arguments);
+        this.isBooleanWrapper = () => {
+            return typeof this.emit() === "boolean";
+        };
+        this.isNumberWrapper = () => {
+            return typeof this.emit() === "number";
+        };
+        this.isStringWrapper = () => {
+            return typeof this.emit() === "string";
+        };
+        this.isArrayWrapper = () => {
+            return Array.isArray(this.emit());
+        };
+    }
+}
+const dynamicWrapper = class extends WrapperHelpersExt {
     constructor(...args) {
-        this.set = (value) => {
-            throw new Error("Dynamic wrapper value cannot be set manually.");
-        };
-        this.setter = (value) => {
-            throw new Error("Dynamic wrapper value cannot be set manually.");
-        };
-        this.toggle = () => {
-            throw new Error("Dynamic wrapper value cannot be toggled.");
-        };
+        super();
         this.emit = () => {
             if (this.pending) {
                 switch (this.wrappers.length) {
@@ -88,30 +98,6 @@ class DynamicWrapper {
             for (const wrapper of this.wrappers)
                 wrapper.dependencies.delete(this);
         };
-        this.seq = (value) => {
-            return this.emit() === value;
-        };
-        this.sneq = (value) => {
-            return this.emit() !== value;
-        };
-        this.eq = (value) => {
-            return this.emit() == value;
-        };
-        this.neq = (value) => {
-            return this.emit() != value;
-        };
-        this.lt = (value) => {
-            return this.emit() < value;
-        };
-        this.lte = (value) => {
-            return this.emit() <= value;
-        };
-        this.gt = (value) => {
-            return this.emit() > value;
-        };
-        this.gte = (value) => {
-            return this.emit() >= value;
-        };
         const emitter = args.pop();
         this.wrappers = args;
         this.emitter = emitter;
@@ -125,6 +111,6 @@ class DynamicWrapper {
     get [Symbol.toStringTag]() {
         return "DynamicWrapper";
     }
-}
-exports.DynamicWrapper = DynamicWrapper;
+};
+exports.DynamicWrapper = dynamicWrapper;
 //# sourceMappingURL=dynamicWrapper.js.map
