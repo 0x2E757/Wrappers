@@ -124,9 +124,13 @@ interface IStringWrapper {
 ```typescript
 interface IArrayWrapper<T> {
   * pop: () => ElementOf<T> | undefined;
+  * popm: () => ElementOf<T> | undefined;
   * push: (...values: ElementOf<T>[]) => number;
+  * pushm: (...values: ElementOf<T>[]) => number;
   * shift: () => ElementOf<T> | undefined;
+  * shiftm: () => ElementOf<T> | undefined;
   * unshift: (...values: ElementOf<T>[]) => void;
+  * unshiftm: (...values: ElementOf<T>[]) => void;
     length: number;
     first: ElementOf<T> | undefined;
     last: ElementOf<T> | undefined;
@@ -137,4 +141,4 @@ interface IArrayWrapper<T> {
     none: (callback: (value: ElementOf<T>) => boolean) => boolean;
 }
 ```
-<sub>\* Methods `pop`, `push`, `shift`, `unshift` are available only in StaticWrapper instances.</sub>
+<sub>\* Methods `pop`, `push`, `shift`, `unshift` are available only in StaticWrapper instances. These methods create a new array, for value mutable updates use methods with m suffix.</sub>

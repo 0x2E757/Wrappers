@@ -1,4 +1,4 @@
-import { ElementOf, IfPrimitive, IfBoolean, IfNumber, IfString, IfArray, Kind, Subscriber, Middleware } from "./types";
+import { ElementOf, IfPrimitive, IfBoolean, IfNumber, IfString, IfArray, Subscriber, Middleware } from "./types";
 import { IWrapperBase, IPrimitiveWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
 import { WrapperHelpers } from "./wrapperHelpers";
 
@@ -22,9 +22,13 @@ interface INumberWrapperHelpersExt extends INumberWrapperHelpers {
 
 interface IArrayWrapperHelpersExt<T> extends IArrayWrapperHelpers<T> {
     readonly pop: () => ElementOf<T> | undefined;
+    readonly popm: () => ElementOf<T> | undefined;
     readonly push: (...values: ElementOf<T>[]) => number;
+    readonly pushm: (...values: ElementOf<T>[]) => number;
     readonly shift: () => ElementOf<T> | undefined;
+    readonly shiftm: () => ElementOf<T> | undefined;
     readonly unshift: (...values: ElementOf<T>[]) => void;
+    readonly unshiftm: (...values: ElementOf<T>[]) => void;
 }
 
 class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperHelpers, INumberWrapperHelpersExt, IArrayWrapperHelpersExt<T> {
@@ -85,37 +89,73 @@ class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperH
     public pop = (): ElementOf<T> | undefined => {
         if (this.isArrayWrapper()) {
             const result = this.value.pop();
-            this.onValueChanged();
+            this.set([...this.value]);
             return result;
         } else
             throw new Error("Method pop allowed only for array type value wrapper.");
     }
 
+    public popm = (): ElementOf<T> | undefined => {
+        if (this.isArrayWrapper()) {
+            const result = this.value.pop();
+            this.onValueChanged();
+            return result;
+        } else
+            throw new Error("Method popm allowed only for array type value wrapper.");
+    }
+
     public push = (...values: ElementOf<T>[]): number => {
         if (this.isArrayWrapper()) {
             const result = this.value.push(...values);
-            this.onValueChanged();
+            this.set([...this.value]);
             return result;
         } else
             throw new Error("Method push allowed only for array type value wrapper.");
     }
 
+    public pushm = (...values: ElementOf<T>[]): number => {
+        if (this.isArrayWrapper()) {
+            const result = this.value.push(...values);
+            this.onValueChanged();
+            return result;
+        } else
+            throw new Error("Method pushm allowed only for array type value wrapper.");
+    }
+
     public shift = (): ElementOf<T> | undefined => {
         if (this.isArrayWrapper()) {
             const result = this.value.shift();
-            this.onValueChanged();
+            this.set([...this.value]);
             return result;
         } else
             throw new Error("Method shift allowed only for array type value wrapper.");
     }
 
+    public shiftm = (): ElementOf<T> | undefined => {
+        if (this.isArrayWrapper()) {
+            const result = this.value.shift();
+            this.onValueChanged();
+            return result;
+        } else
+            throw new Error("Method shiftm allowed only for array type value wrapper.");
+    }
+
     public unshift = (...values: ElementOf<T>[]): number => {
+        if (this.isArrayWrapper()) {
+            const result = this.value.unshift(...values);
+            this.set([...this.value]);
+            return result;
+        } else
+            throw new Error("Method unshift allowed only for array type value wrapper.");
+    }
+
+    public unshiftm = (...values: ElementOf<T>[]): number => {
         if (this.isArrayWrapper()) {
             const result = this.value.unshift(...values);
             this.onValueChanged();
             return result;
         } else
-            throw new Error("Method unshift allowed only for array type value wrapper.");
+            throw new Error("Method unshiftm allowed only for array type value wrapper.");
     }
 
     public random: {
@@ -139,9 +179,7 @@ class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperH
 
 const staticWrapper = class <T> extends WrapperHelpersExt<T> implements IWrapperBaseExt<T> {
 
-    protected kind: Kind;
     protected value: T;
-    protected pending: boolean;
     protected subscribers: Set<Subscriber<T>>;
     protected dependencies: Set<Wrapper<any>>;
     protected middlewares!: Middleware<T>[];
@@ -150,9 +188,7 @@ const staticWrapper = class <T> extends WrapperHelpersExt<T> implements IWrapper
 
     public constructor(value: T) {
         super();
-        this.kind = Kind.Static;
         this.value = value;
-        this.pending = false;
         this.subscribers = new Set();
         this.dependencies = new Set();
         this.set = this.assign;
@@ -174,8 +210,7 @@ const staticWrapper = class <T> extends WrapperHelpersExt<T> implements IWrapper
         for (const subscriber of this.subscribers)
             subscriber(this.value);
         for (const dependency of this.dependencies)
-            if (dependency.kind == Kind.Reflecting)
-                dependency.trigger();
+            dependency.trigger();
     }
 
     protected assign = (value: T): void => {

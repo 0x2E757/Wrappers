@@ -6,8 +6,6 @@ export type IfNumber<T, U, V = {}> = IfExtends<T, number, U, V>;
 export type IfString<T, U, V = {}> = IfExtends<T, string, U, V>;
 export type IfArray<T, U, V = {}> = IfExtends<T, ElementOf<T>[], U, V>;
 
-export enum Kind { None, Static, Reflecting, Lazy };
-
 export type Subscriber<T> = (value: T) => void;
 export type Emitter<T, U> = U extends unknown[] ? (...args: U) => T : () => T;
 export type Wrappers<T> = T extends [] ? [] : { [K in keyof T]: Wrapper<T[K]> };
@@ -52,13 +50,11 @@ export interface IArrayWrapperHelpers<T> {
 
 export abstract class Wrapper<T> implements IWrapperBase<T> {
 
-    public abstract kind: Kind;
     public abstract value: T;
     public abstract dependencies: Set<Wrapper<any>>;
 
     public abstract set: (value: T) => void;
     public abstract emit: () => T;
-    public abstract update: (kind: Kind) => void;
     public abstract trigger: () => void;
     public abstract subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;
     public abstract unsubscribe: (callback: Subscriber<T>) => void;

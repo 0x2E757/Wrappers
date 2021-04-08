@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DynamicWrapper = void 0;
-const types_1 = require("./types");
 const wrapperHelpers_1 = require("./wrapperHelpers");
 class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
     constructor() {
@@ -50,42 +49,20 @@ const dynamicWrapper = class extends WrapperHelpersExt {
             }
             return this.value;
         };
-        this.update = (kind) => {
-            if (kind == types_1.Kind.None)
-                if (!this.subscribers.size) {
-                    for (const dependency of this.dependencies)
-                        if (dependency.kind == types_1.Kind.Reflecting) {
-                            kind = types_1.Kind.Reflecting;
-                            break;
-                        }
-                    kind = types_1.Kind.Lazy;
-                }
-                else
-                    kind = types_1.Kind.Reflecting;
-            if (this.kind != kind) {
-                this.kind = kind;
-                for (const wrapper of this.wrappers)
-                    if (wrapper.kind != types_1.Kind.Static)
-                        wrapper.update(kind == types_1.Kind.Reflecting ? types_1.Kind.Reflecting : types_1.Kind.None);
-            }
-        };
         this.trigger = () => {
             this.pending = true;
             for (const subscriber of this.subscribers)
                 subscriber(this.emit());
             for (const dependency of this.dependencies)
-                if (dependency.kind == types_1.Kind.Reflecting)
-                    dependency.trigger();
+                dependency.trigger();
         };
         this.subscribe = (subscriber, triggerImmediately = false) => {
             this.subscribers.add(subscriber);
-            this.update(types_1.Kind.Reflecting);
             if (triggerImmediately)
                 subscriber(this.emit());
         };
         this.unsubscribe = (subscriber) => {
             this.subscribers.delete(subscriber);
-            this.update(types_1.Kind.None);
         };
         this.applyMiddleware = (middleware) => {
             throw new Error("Dynamic wrapper cannot have middleware.");
@@ -101,7 +78,6 @@ const dynamicWrapper = class extends WrapperHelpersExt {
         const emitter = args.pop();
         this.wrappers = args;
         this.emitter = emitter;
-        this.kind = types_1.Kind.Lazy;
         this.pending = true;
         this.subscribers = new Set();
         this.dependencies = new Set();

@@ -1,6 +1,6 @@
 {
   "name": "@0x2e757/wrappers",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "TypeScript variable wrapper library, transpiled to ES2015 JavaScript.",
   "author": "Eric Kevrel",
   "license": "MIT",
@@ -10,6 +10,6 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "typescript": "^4.2.3"
+    "typescript": "^4.2.4"
   }
 }

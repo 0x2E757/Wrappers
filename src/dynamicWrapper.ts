@@ -1,4 +1,4 @@
-import { ElementOf, IfPrimitive, IfNumber, IfString, IfArray, Kind, Subscriber, Emitter, Wrappers, IWrappers, Middleware } from "./types";
+import { ElementOf, IfPrimitive, IfNumber, IfString, IfArray, Subscriber, Emitter, Wrappers, IWrappers, Middleware } from "./types";
 import { IWrapperBase, IPrimitiveWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
 import { WrapperHelpers } from "./wrapperHelpers";
 
@@ -25,7 +25,6 @@ const dynamicWrapper = class <T, U extends unknown[]> extends WrapperHelpersExt<
 
     protected wrappers: Wrappers<U>;
     protected emitter: Emitter<T, U>;
-    protected kind: Kind;
     protected value!: T;
     protected pending: boolean;
     protected subscribers: Set<Subscriber<T>>;
@@ -36,7 +35,6 @@ const dynamicWrapper = class <T, U extends unknown[]> extends WrapperHelpersExt<
         const emitter = args.pop();
         this.wrappers = args as unknown as Wrappers<U>;
         this.emitter = emitter as Emitter<T, U>;
-        this.kind = Kind.Lazy;
         this.pending = true;
         this.subscribers = new Set();
         this.dependencies = new Set();
@@ -64,44 +62,22 @@ const dynamicWrapper = class <T, U extends unknown[]> extends WrapperHelpersExt<
         return this.value;
     }
 
-    protected update = (kind: Kind): void => {
-        if (kind == Kind.None)
-            if (!this.subscribers.size) {
-                for (const dependency of this.dependencies)
-                    if (dependency.kind == Kind.Reflecting) {
-                        kind = Kind.Reflecting;
-                        break;
-                    }
-                kind = Kind.Lazy;
-            } else
-                kind = Kind.Reflecting;
-        if (this.kind != kind) {
-            this.kind = kind;
-            for (const wrapper of this.wrappers)
-                if (wrapper.kind != Kind.Static)
-                    wrapper.update(kind == Kind.Reflecting ? Kind.Reflecting : Kind.None);
-        }
-    }
-
     protected trigger = (): void => {
         this.pending = true;
         for (const subscriber of this.subscribers)
             subscriber(this.emit());
         for (const dependency of this.dependencies)
-            if (dependency.kind == Kind.Reflecting)
-                dependency.trigger();
+            dependency.trigger();
     }
 
     public subscribe = (subscriber: Subscriber<T>, triggerImmediately: boolean = false): void => {
         this.subscribers.add(subscriber);
-        this.update(Kind.Reflecting);
         if (triggerImmediately)
             subscriber(this.emit());
     }
 
     public unsubscribe = (subscriber: Subscriber<T>): void => {
         this.subscribers.delete(subscriber);
-        this.update(Kind.None);
     }
 
     public applyMiddleware = (middleware: Middleware<T>): never => {

@@ -17,9 +17,13 @@ interface INumberWrapperHelpersExt extends INumberWrapperHelpers {
 }
 interface IArrayWrapperHelpersExt<T> extends IArrayWrapperHelpers<T> {
     readonly pop: () => ElementOf<T> | undefined;
+    readonly popm: () => ElementOf<T> | undefined;
     readonly push: (...values: ElementOf<T>[]) => number;
+    readonly pushm: (...values: ElementOf<T>[]) => number;
     readonly shift: () => ElementOf<T> | undefined;
+    readonly shiftm: () => ElementOf<T> | undefined;
     readonly unshift: (...values: ElementOf<T>[]) => void;
+    readonly unshiftm: (...values: ElementOf<T>[]) => void;
 }
 export declare type IStaticWrapper<T> = IWrapperBaseExt<T> & IfPrimitive<T, IPrimitiveWrapperHelpers<T>> & IfBoolean<T, IBooleanWrapperHelpers> & IfNumber<T, INumberWrapperHelpersExt> & IfString<T, IStringWrapperHelpers> & IfArray<T, IArrayWrapperHelpersExt<T>>;
 export declare const StaticWrapper: {

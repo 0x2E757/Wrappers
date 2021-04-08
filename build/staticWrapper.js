@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StaticWrapper = void 0;
-const types_1 = require("./types");
 const wrapperHelpers_1 = require("./wrapperHelpers");
 class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
     constructor() {
@@ -55,38 +54,74 @@ class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
         this.pop = () => {
             if (this.isArrayWrapper()) {
                 const result = this.value.pop();
-                this.onValueChanged();
+                this.set([...this.value]);
                 return result;
             }
             else
                 throw new Error("Method pop allowed only for array type value wrapper.");
         };
+        this.popm = () => {
+            if (this.isArrayWrapper()) {
+                const result = this.value.pop();
+                this.onValueChanged();
+                return result;
+            }
+            else
+                throw new Error("Method popm allowed only for array type value wrapper.");
+        };
         this.push = (...values) => {
+            if (this.isArrayWrapper()) {
+                const result = this.value.push(...values);
+                this.set([...this.value]);
+                return result;
+            }
+            else
+                throw new Error("Method push allowed only for array type value wrapper.");
+        };
+        this.pushm = (...values) => {
             if (this.isArrayWrapper()) {
                 const result = this.value.push(...values);
                 this.onValueChanged();
                 return result;
             }
             else
-                throw new Error("Method push allowed only for array type value wrapper.");
+                throw new Error("Method pushm allowed only for array type value wrapper.");
         };
         this.shift = () => {
+            if (this.isArrayWrapper()) {
+                const result = this.value.shift();
+                this.set([...this.value]);
+                return result;
+            }
+            else
+                throw new Error("Method shift allowed only for array type value wrapper.");
+        };
+        this.shiftm = () => {
             if (this.isArrayWrapper()) {
                 const result = this.value.shift();
                 this.onValueChanged();
                 return result;
             }
             else
-                throw new Error("Method shift allowed only for array type value wrapper.");
+                throw new Error("Method shiftm allowed only for array type value wrapper.");
         };
         this.unshift = (...values) => {
+            if (this.isArrayWrapper()) {
+                const result = this.value.unshift(...values);
+                this.set([...this.value]);
+                return result;
+            }
+            else
+                throw new Error("Method unshift allowed only for array type value wrapper.");
+        };
+        this.unshiftm = (...values) => {
             if (this.isArrayWrapper()) {
                 const result = this.value.unshift(...values);
                 this.onValueChanged();
                 return result;
             }
             else
-                throw new Error("Method unshift allowed only for array type value wrapper.");
+                throw new Error("Method unshiftm allowed only for array type value wrapper.");
         };
         this.random = (...args) => {
             if (this.isNumberWrapper()) {
@@ -117,8 +152,7 @@ const staticWrapper = class extends WrapperHelpersExt {
             for (const subscriber of this.subscribers)
                 subscriber(this.value);
             for (const dependency of this.dependencies)
-                if (dependency.kind == types_1.Kind.Reflecting)
-                    dependency.trigger();
+                dependency.trigger();
         };
         this.assign = (value) => {
             if (this.value !== value) {
@@ -146,9 +180,7 @@ const staticWrapper = class extends WrapperHelpersExt {
             if (this.subscribers.size)
                 console.warn("Disposing wrapper that has subscribers.");
         };
-        this.kind = types_1.Kind.Static;
         this.value = value;
-        this.pending = false;
         this.subscribers = new Set();
         this.dependencies = new Set();
         this.set = this.assign;

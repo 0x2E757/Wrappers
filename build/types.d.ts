@@ -5,12 +5,6 @@ export declare type IfBoolean<T, U, V = {}> = IfExtends<T, boolean, U, V>;
 export declare type IfNumber<T, U, V = {}> = IfExtends<T, number, U, V>;
 export declare type IfString<T, U, V = {}> = IfExtends<T, string, U, V>;
 export declare type IfArray<T, U, V = {}> = IfExtends<T, ElementOf<T>[], U, V>;
-export declare enum Kind {
-    None = 0,
-    Static = 1,
-    Reflecting = 2,
-    Lazy = 3
-}
 export declare type Subscriber<T> = (value: T) => void;
 export declare type Emitter<T, U> = U extends unknown[] ? (...args: U) => T : () => T;
 export declare type Wrappers<T> = T extends [] ? [] : {
@@ -52,12 +46,10 @@ export interface IArrayWrapperHelpers<T> {
     readonly none: (callback: (value: ElementOf<T>) => boolean) => boolean;
 }
 export declare abstract class Wrapper<T> implements IWrapperBase<T> {
-    abstract kind: Kind;
     abstract value: T;
     abstract dependencies: Set<Wrapper<any>>;
     abstract set: (value: T) => void;
     abstract emit: () => T;
-    abstract update: (kind: Kind) => void;
     abstract trigger: () => void;
     abstract subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;
     abstract unsubscribe: (callback: Subscriber<T>) => void;
