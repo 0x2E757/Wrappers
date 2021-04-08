@@ -67,8 +67,8 @@ Wrappers are always implementing base interface `IWrapperBase`:
 
 ```typescript
 interface IWrapperBase<T> {
-  * set: (value: T) => void;
-  * setter: (value: T) => () => void;
+  * set: (value: T, debounce?: number) => void;
+  * setter: (value: T, debounce?: number) => () => void;
   * applyMiddleware: (middleware: Middleware<T>) => void;
     emit: () => T;
     subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;
@@ -141,4 +141,4 @@ interface IArrayWrapper<T> {
     none: (callback: (value: ElementOf<T>) => boolean) => boolean;
 }
 ```
-<sub>\* Methods `pop`, `push`, `shift`, `unshift` are available only in StaticWrapper instances. These methods create a new array, for value mutable updates use methods with m suffix.</sub>
+<sub>\* Methods `pop`, `push`, `shift`, `unshift` are available only in StaticWrapper instances. These methods create a new array, for value mutable updates use methods with m suffix (note that they aren't affected by middlewares).</sub>

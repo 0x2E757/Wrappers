@@ -2,8 +2,8 @@ import { ElementOf, IfPrimitive, IfBoolean, IfNumber, IfString, IfArray, Middlew
 import { IWrapperBase, IPrimitiveWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers } from "./types";
 interface IWrapperBaseExt<T> extends IWrapperBase<T> {
     readonly applyMiddleware: (middleware: Middleware<T>) => void;
-    readonly set: (value: T) => void;
-    readonly setter: (value: T) => () => void;
+    readonly set: (value: T, debounce?: number) => void;
+    readonly setter: (value: T, debounce?: number) => () => void;
 }
 interface IBooleanWrapperHelpers {
     readonly toggle: () => void;

@@ -63,7 +63,7 @@ class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
         this.popm = () => {
             if (this.isArrayWrapper()) {
                 const result = this.value.pop();
-                this.onValueChanged();
+                this.trigger();
                 return result;
             }
             else
@@ -81,7 +81,7 @@ class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
         this.pushm = (...values) => {
             if (this.isArrayWrapper()) {
                 const result = this.value.push(...values);
-                this.onValueChanged();
+                this.trigger();
                 return result;
             }
             else
@@ -99,7 +99,7 @@ class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
         this.shiftm = () => {
             if (this.isArrayWrapper()) {
                 const result = this.value.shift();
-                this.onValueChanged();
+                this.trigger();
                 return result;
             }
             else
@@ -117,7 +117,7 @@ class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
         this.unshiftm = (...values) => {
             if (this.isArrayWrapper()) {
                 const result = this.value.unshift(...values);
-                this.onValueChanged();
+                this.trigger();
                 return result;
             }
             else
@@ -140,6 +140,10 @@ class WrapperHelpersExt extends wrapperHelpers_1.WrapperHelpers {
 const staticWrapper = class extends WrapperHelpersExt {
     constructor(value) {
         super();
+        this.debounceWrap = (func, value, debounce) => {
+            this.debounce = debounce || 0;
+            func(value);
+        };
         this.applyMiddleware = (middleware) => {
             var _a;
             (_a = this.middlewares) !== null && _a !== void 0 ? _a : (this.middlewares = []);
@@ -147,21 +151,30 @@ const staticWrapper = class extends WrapperHelpersExt {
             this.set = this.assign;
             for (const middleware of this.middlewares)
                 this.set = middleware(this.set);
+            this.set = (value, debounce) => this.debounceWrap(this.set, value, debounce);
         };
-        this.onValueChanged = () => {
+        this.trigger = () => {
             for (const subscriber of this.subscribers)
                 subscriber(this.value);
             for (const dependency of this.dependencies)
                 dependency.trigger();
         };
-        this.assign = (value) => {
+        this.assignInner = (value) => {
             if (this.value !== value) {
                 this.value = value;
-                this.onValueChanged();
+                this.trigger();
             }
         };
-        this.setter = (value) => () => {
-            this.set(value);
+        this.assign = (value) => {
+            if (this.timeoutHandle)
+                clearTimeout(this.timeoutHandle);
+            if (this.debounce)
+                this.timeoutHandle = setTimeout(this.assignInner, this.debounce, value);
+            else
+                this.assignInner(value);
+        };
+        this.setter = (value, debounce) => () => {
+            this.set(value, debounce);
         };
         this.emit = () => {
             return this.value;
@@ -183,7 +196,7 @@ const staticWrapper = class extends WrapperHelpersExt {
         this.value = value;
         this.subscribers = new Set();
         this.dependencies = new Set();
-        this.set = this.assign;
+        this.set = (value, debounce) => this.debounceWrap(this.assign, value, debounce);
     }
     get [Symbol.toStringTag]() {
         return "StaticWrapper";

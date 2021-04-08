@@ -48,7 +48,7 @@ export interface IArrayWrapperHelpers<T> {
 export declare abstract class Wrapper<T> implements IWrapperBase<T> {
     abstract value: T;
     abstract dependencies: Set<Wrapper<any>>;
-    abstract set: (value: T) => void;
+    abstract set: (value: T, debounce?: number) => void;
     abstract emit: () => T;
     abstract trigger: () => void;
     abstract subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;

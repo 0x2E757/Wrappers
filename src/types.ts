@@ -53,7 +53,7 @@ export abstract class Wrapper<T> implements IWrapperBase<T> {
     public abstract value: T;
     public abstract dependencies: Set<Wrapper<any>>;
 
-    public abstract set: (value: T) => void;
+    public abstract set: (value: T, debounce?: number) => void;
     public abstract emit: () => T;
     public abstract trigger: () => void;
     public abstract subscribe: (callback: Subscriber<T>, triggerImmediately?: boolean) => void;

@@ -4,8 +4,8 @@ import { WrapperHelpers } from "./wrapperHelpers";
 
 interface IWrapperBaseExt<T> extends IWrapperBase<T> {
     readonly applyMiddleware: (middleware: Middleware<T>) => void;
-    readonly set: (value: T) => void;
-    readonly setter: (value: T) => () => void;
+    readonly set: (value: T, debounce?: number) => void;
+    readonly setter: (value: T, debounce?: number) => () => void;
 }
 
 interface IBooleanWrapperHelpers {
@@ -33,7 +33,7 @@ interface IArrayWrapperHelpersExt<T> extends IArrayWrapperHelpers<T> {
 
 class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperHelpers, INumberWrapperHelpersExt, IArrayWrapperHelpersExt<T> {
 
-    protected onValueChanged!: () => void;
+    protected trigger!: () => void;
 
     protected isBooleanWrapper = (): this is Wrapper<boolean> => {
         return typeof this.value === "boolean";
@@ -98,7 +98,7 @@ class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperH
     public popm = (): ElementOf<T> | undefined => {
         if (this.isArrayWrapper()) {
             const result = this.value.pop();
-            this.onValueChanged();
+            this.trigger();
             return result;
         } else
             throw new Error("Method popm allowed only for array type value wrapper.");
@@ -116,7 +116,7 @@ class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperH
     public pushm = (...values: ElementOf<T>[]): number => {
         if (this.isArrayWrapper()) {
             const result = this.value.push(...values);
-            this.onValueChanged();
+            this.trigger();
             return result;
         } else
             throw new Error("Method pushm allowed only for array type value wrapper.");
@@ -134,7 +134,7 @@ class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperH
     public shiftm = (): ElementOf<T> | undefined => {
         if (this.isArrayWrapper()) {
             const result = this.value.shift();
-            this.onValueChanged();
+            this.trigger();
             return result;
         } else
             throw new Error("Method shiftm allowed only for array type value wrapper.");
@@ -152,7 +152,7 @@ class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperH
     public unshiftm = (...values: ElementOf<T>[]): number => {
         if (this.isArrayWrapper()) {
             const result = this.value.unshift(...values);
-            this.onValueChanged();
+            this.trigger();
             return result;
         } else
             throw new Error("Method unshiftm allowed only for array type value wrapper.");
@@ -180,22 +180,29 @@ class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperH
 const staticWrapper = class <T> extends WrapperHelpersExt<T> implements IWrapperBaseExt<T> {
 
     protected value: T;
+    protected debounce!: number;
+    protected timeoutHandle!: number;
     protected subscribers: Set<Subscriber<T>>;
     protected dependencies: Set<Wrapper<any>>;
     protected middlewares!: Middleware<T>[];
 
-    public set: (value: T) => void;
+    public set: (value: T, debounce?: number) => void;
 
     public constructor(value: T) {
         super();
         this.value = value;
         this.subscribers = new Set();
         this.dependencies = new Set();
-        this.set = this.assign;
+        this.set = (value: T, debounce?: number) => this.debounceWrap(this.assign, value, debounce);
     }
 
     public get [Symbol.toStringTag](): string {
         return "StaticWrapper";
+    }
+
+    protected debounceWrap = (func: (value: T) => void, value: T, debounce?: number): any => {
+        this.debounce = debounce || 0;
+        func(value);
     }
 
     public applyMiddleware = (middleware: Middleware<T>): void => {
@@ -204,24 +211,34 @@ const staticWrapper = class <T> extends WrapperHelpersExt<T> implements IWrapper
         this.set = this.assign;
         for (const middleware of this.middlewares)
             this.set = middleware(this.set);
+        this.set = (value: T, debounce?: number) => this.debounceWrap(this.set, value, debounce);
     }
 
-    protected onValueChanged = (): void => {
+    protected trigger = (): void => {
         for (const subscriber of this.subscribers)
             subscriber(this.value);
         for (const dependency of this.dependencies)
             dependency.trigger();
     }
 
-    protected assign = (value: T): void => {
+    protected assignInner = (value: T): void => {
         if (this.value !== value) {
             this.value = value;
-            this.onValueChanged();
+            this.trigger();
         }
     }
 
-    public setter = (value: T) => (): void => {
-        this.set(value);
+    protected assign = (value: T): void => {
+        if (this.timeoutHandle)
+            clearTimeout(this.timeoutHandle);
+        if (this.debounce)
+            this.timeoutHandle = setTimeout(this.assignInner, this.debounce, value);
+        else
+            this.assignInner(value);
+    }
+
+    public setter = (value: T, debounce?: number) => (): void => {
+        this.set(value, debounce);
     }
 
     public emit = (): T => {
