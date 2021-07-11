@@ -193,25 +193,20 @@ const staticWrapper = class <T> extends WrapperHelpersExt<T> implements IWrapper
         this.value = value;
         this.subscribers = new Set();
         this.dependencies = new Set();
-        this.set = (value: T, debounce?: number) => this.debounceWrap(this.assign, value, debounce);
+        this.set = (value: T, debounce?: number) => this.assign(this.assignInner, value, debounce);
     }
 
     public get [Symbol.toStringTag](): string {
         return "StaticWrapper";
     }
 
-    protected debounceWrap = (func: (value: T) => void, value: T, debounce?: number): any => {
-        this.debounce = debounce || 0;
-        func(value);
-    }
-
     public applyMiddleware = (middleware: Middleware<T>): void => {
         this.middlewares ??= [];
         this.middlewares.unshift(middleware);
-        this.set = this.assign;
+        let wrappedAssignInner: (value: T) => void = this.assignInner;
         for (const middleware of this.middlewares)
-            this.set = middleware(this.set);
-        this.set = (value: T, debounce?: number) => this.debounceWrap(this.set, value, debounce);
+            wrappedAssignInner = middleware(wrappedAssignInner);
+        this.set = (value: T, debounce?: number) => this.assign(wrappedAssignInner, value, debounce);
     }
 
     protected trigger = (): void => {
@@ -221,20 +216,21 @@ const staticWrapper = class <T> extends WrapperHelpersExt<T> implements IWrapper
             dependency.trigger();
     }
 
+    protected assign = (func: (value: T) => void, value: T, debounce?: number): any => {
+        this.debounce = debounce || 0;
+        if (this.timeoutHandle)
+            clearTimeout(this.timeoutHandle);
+        if (this.debounce)
+            this.timeoutHandle = setTimeout(func, this.debounce, value);
+        else
+            func(value);
+    }
+
     protected assignInner = (value: T): void => {
         if (this.value !== value) {
             this.value = value;
             this.trigger();
         }
-    }
-
-    protected assign = (value: T): void => {
-        if (this.timeoutHandle)
-            clearTimeout(this.timeoutHandle);
-        if (this.debounce)
-            this.timeoutHandle = setTimeout(this.assignInner, this.debounce, value);
-        else
-            this.assignInner(value);
     }
 
     public setter = (value: T, debounce?: number) => (): void => {
