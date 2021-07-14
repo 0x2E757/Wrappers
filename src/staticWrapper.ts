@@ -35,6 +35,11 @@ class WrapperHelpersExt<T> extends WrapperHelpers<T> implements IBooleanWrapperH
 
     protected trigger!: () => void;
 
+    protected isPrimitiveWrapper = (): this is Wrapper<boolean | number | string> => {
+        const type: string = typeof this.value;
+        return type === "boolean" || type === "number" || type === "string";
+    }
+
     protected isBooleanWrapper = (): this is Wrapper<boolean> => {
         return typeof this.value === "boolean";
     }

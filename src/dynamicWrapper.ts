@@ -4,6 +4,11 @@ import { WrapperHelpers } from "./wrapperHelpers";
 
 class WrapperHelpersExt<T> extends WrapperHelpers<T> {
 
+    protected isPrimitiveWrapper = (): this is Wrapper<boolean | number | string> => {
+        const type: string = typeof this.emit();
+        return type === "boolean" || type === "number" || type === "string";
+    }
+
     protected isBooleanWrapper = (): this is Wrapper<boolean> => {
         return typeof this.emit() === "boolean";
     }
