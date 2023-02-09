@@ -3,5 +3,8 @@ import { IDynamicWrapper } from "./dynamicWrapper";
 
 export type IWrapper<T> = IStaticWrapper<T> | IDynamicWrapper<T>;
 
-export { StaticWrapper, IStaticWrapper } from "./staticWrapper";
-export { DynamicWrapper, IDynamicWrapper } from "./dynamicWrapper";
+export type { IStaticWrapper } from "./staticWrapper";
+export type { IDynamicWrapper } from "./dynamicWrapper";
+
+export { StaticWrapper } from "./staticWrapper";
+export { DynamicWrapper } from "./dynamicWrapper";
