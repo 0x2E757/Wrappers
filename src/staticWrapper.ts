@@ -1,5 +1,5 @@
-import { ElementOf, IfPrimitive, IfBoolean, IfNumber, IfString, IfArray, Subscriber, Middleware } from "./types";
-import { IWrapperBase, IPrimitiveWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
+import { ElementOf, IfBoolean, IfNumber, IfString, IfArray, Subscriber, Middleware } from "./types";
+import { IWrapperBase, IBaseWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
 import { WrapperHelpers } from "./wrapperHelpers";
 
 interface IWrapperBaseExt<T> extends IWrapperBase<T> {
@@ -267,7 +267,7 @@ const staticWrapper = class <T> extends WrapperHelpersExt<T> implements IWrapper
 
 export type IStaticWrapper<T> =
     & IWrapperBaseExt<T>
-    & IfPrimitive<T, IPrimitiveWrapperHelpers<T>>
+    & IBaseWrapperHelpers<T>
     & IfBoolean<T, IBooleanWrapperHelpers>
     & IfNumber<T, INumberWrapperHelpersExt>
     & IfString<T, IStringWrapperHelpers>

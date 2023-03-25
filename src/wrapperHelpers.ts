@@ -1,28 +1,21 @@
-import { ElementOf, IPrimitiveWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
+import { ElementOf, IBaseWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
 
-export class WrapperHelpers<T> implements IPrimitiveWrapperHelpers<T>, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers<T> {
+export class WrapperHelpers<T> implements IBaseWrapperHelpers<T>, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers<T> {
 
     protected value!: T;
     protected emit!: () => T;
 
-    protected isPrimitiveWrapper!: () => this is Wrapper<boolean | number | string>;
     protected isBooleanWrapper!: () => this is Wrapper<boolean>;
     protected isNumberWrapper!: () => this is Wrapper<number>;
     protected isStringWrapper!: () => this is Wrapper<string>;
     protected isArrayWrapper!: () => this is Wrapper<ElementOf<T>[]>;
 
     public eq = (value: T): boolean => {
-        if (this.isPrimitiveWrapper())
-            return this.value === value;
-        else
-            throw new Error("Only primitive type (boolean, number or string) wrapper value can be compared for equality.");
+        return this.value === value;
     }
 
     public neq = (value: T): boolean => {
-        if (this.isPrimitiveWrapper())
-            return this.value !== value;
-        else
-            throw new Error("Only primitive type (boolean, number or string) wrapper value can be compared for inequality.");
+        return this.value !== value;
     }
 
     public lt = (value: number): boolean => {

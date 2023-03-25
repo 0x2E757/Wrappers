@@ -1,5 +1,5 @@
-import { ElementOf, IfPrimitive, IfNumber, IfString, IfArray, Subscriber, Emitter, Wrappers, IWrappers, Middleware } from "./types";
-import { IWrapperBase, IPrimitiveWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
+import { ElementOf, IfNumber, IfString, IfArray, Subscriber, Emitter, Wrappers, IWrappers, Middleware } from "./types";
+import { IWrapperBase, IBaseWrapperHelpers, INumberWrapperHelpers, IStringWrapperHelpers, IArrayWrapperHelpers, Wrapper } from "./types";
 import { WrapperHelpers } from "./wrapperHelpers";
 
 class WrapperHelpersExt<T> extends WrapperHelpers<T> {
@@ -102,7 +102,7 @@ const dynamicWrapper = class <T, U extends unknown[]> extends WrapperHelpersExt<
 
 export type IDynamicWrapper<T> =
     & IWrapperBase<T>
-    & IfPrimitive<T, IPrimitiveWrapperHelpers<T>>
+    & IBaseWrapperHelpers<T>
     & IfNumber<T, INumberWrapperHelpers>
     & IfString<T, IStringWrapperHelpers>
     & IfArray<T, IArrayWrapperHelpers<T>>;

@@ -19,7 +19,7 @@ export interface IWrapperBase<T> {
     readonly dispose: () => void;
 }
 
-export interface IPrimitiveWrapperHelpers<T> {
+export interface IBaseWrapperHelpers<T> {
     readonly eq: (value: T) => boolean;
     readonly neq: (value: T) => boolean;
 }
