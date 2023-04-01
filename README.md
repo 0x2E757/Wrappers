@@ -83,12 +83,12 @@ interface IWrapperBase<T> {
 Depending on wrapper value type different helper methods (few of them are getter properties) are available. They can modify wrapper's value (in static wrappers only) or perform some action with value and return a result. In fact, all of them always exist in class objects, but for static typing purposes using TypeScript types they are hidden from IDE and static code analyzer.
 
 ```typescript
-interface IPrimitiveWrapper<T> {
+interface IBaseWrapperHelpers<T> {
     eq: (value: T) => boolean;
     neq: (value: T) => boolean;
 }
 ```
-<sub>Booleans, numbers and strings are considered as primitives.</sub>
+<sub>Available in both StaticWrapper and DynamicWrapper instances.</sub>
 
 ```typescript
 interface IBooleanWrapper {
