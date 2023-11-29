@@ -17,7 +17,7 @@ Simple wrapper that can be used as a value container. Has derived `LocalStorageW
 #### Usage example:
 
 ```typescript
-import { StaticWrapper } from "@0x2e757/wrappers";
+import { StaticWrapper } from "@0x2e757/Wrappers";
 
 const wNumber = new StaticWrapper(0);
 wNumber.subscribe(console.log);
@@ -42,8 +42,7 @@ Advanced wrapper which contains dynamically computed value (it can not be set ma
 #### Usage example:
 
 ```typescript
-import { StaticWrapper } from "@0x2e757/StaticWrapper.js";
-import { DynamicWrapper } from "@0x2e757/DynamicWrapper.js";
+import { StaticWrapper, DynamicWrapper } from "@0x2e757/Wrappers";
 
 const wUsername = new StaticWrapper("John");
 const wBalance = new StaticWrapper(100);
@@ -67,7 +66,7 @@ Helper class that dynamically will return either `StaticWrapper` or `DynamicWrap
 #### Usage example:
 
 ```TypeScript
-import { Wrapper } from "@0x2e757/Wrapper.js";
+import { Wrapper } from "@0x2e757/Wrappers";
 
 const staticWrapper = new Wrapper(0);
 const dynamicWrapper = new Wrapper(() => staticWrapper.value * 2);
