@@ -1,16 +1,12 @@
 import { Subscribable } from "./Subscribable.js";
 import { DependencyObserver } from "./DependencyObserver.js";
-import { Emitter } from "./types.js";
-
-export class DynamicWrapper<T = any> extends Subscribable<T> {
-
-    #emitter: Emitter<T>;
-    #delay?: number;
-    #timeout?: ReturnType<typeof setTimeout>;
-    #emitRequired: boolean;
-    #value: T;
-
-    public get value() {
+export class DynamicWrapper extends Subscribable {
+    #emitter;
+    #delay;
+    #timeout;
+    #emitRequired;
+    #value;
+    get value() {
         if (DependencyObserver.enabled)
             DependencyObserver.add(this);
         if (this.#emitRequired) {
@@ -19,12 +15,10 @@ export class DynamicWrapper<T = any> extends Subscribable<T> {
         }
         return this.#value;
     }
-
-    public get [Symbol.toStringTag](): string {
+    get [Symbol.toStringTag]() {
         return "DynamicWrapper";
     }
-
-    public constructor(emitter: Emitter<T>, delay?: number) {
+    constructor(emitter, delay) {
         super();
         this.#emitter = emitter;
         this.#delay = delay;
@@ -35,28 +29,26 @@ export class DynamicWrapper<T = any> extends Subscribable<T> {
         for (const wrapper of DependencyObserver.wrappers)
             wrapper.subscribe(this.#trigger);
     }
-
-    public bind = (...wrappers: Subscribable[]) => {
+    bind = (...wrappers) => {
         for (const wrapper of wrappers)
             wrapper.subscribe(this.#trigger);
-    }
-
+    };
     #trigger = () => {
         if (this.#delay !== undefined) {
             clearTimeout(this.#timeout);
             this.#timeout = setTimeout(this.#update, this.#delay);
-        } else
+        }
+        else
             this.#update();
-    }
-
+    };
     #update = () => {
         if (this.hasSubscribers) {
             const oldValue = this.#value;
             this.#value = this.#emitter();
             if (this.#value !== oldValue)
                 this.triggerCallbacks(this.#value);
-        } else
+        }
+        else
             this.#emitRequired = true;
-    }
-
+    };
 }

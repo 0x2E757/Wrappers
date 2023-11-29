@@ -1,15 +1,16 @@
 {
   "name": "@0x2e757/wrappers",
-  "version": "2.2.6",
-  "description": "TypeScript variable wrapper library, transpiled to ES2015 JavaScript.",
+  "version": "3.0.0",
+  "description": "Variable wrapper typescript library, transpiled to ESNext JavaScript",
   "author": "Eric Kevrel",
   "license": "MIT",
   "repository": "0x2E757/Wrappers",
-  "main": "./build/index.js",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc"
   },
   "devDependencies": {
-    "typescript": "^4.9.5"
+    "typescript": "latest"
   }
 }

@@ -1,63 +1,55 @@
 import { Subscribable } from "./Subscribable.js";
 import { DependencyObserver } from "./DependencyObserver.js";
-
-export class StaticWrapper<T = any> extends Subscribable<T> {
-
-    #value: T;
-    #delay?: number;
-    #timeout?: ReturnType<typeof setTimeout>;
-    #proxyHandler: ProxyHandler<object>;
-
-    public get value() {
+export class StaticWrapper extends Subscribable {
+    #value;
+    #delay;
+    #timeout;
+    #proxyHandler;
+    get value() {
         if (DependencyObserver.enabled)
             DependencyObserver.add(this);
         if (typeof this.#value === "object" && this.#value !== null)
-            return new Proxy(this.#value!, this.#proxyHandler) as T;
+            return new Proxy(this.#value, this.#proxyHandler);
         return this.#value;
     }
-
-    public set value(newValue) {
+    set value(newValue) {
         if (this.#value !== newValue) {
             this.#value = newValue;
             this.#trigger();
         }
     }
-
-    public get [Symbol.toStringTag](): string {
+    get [Symbol.toStringTag]() {
         return "StaticWrapper";
     }
-
-    public constructor(value: T, delay?: number) {
+    constructor(value, delay) {
         super();
         this.#value = value;
         this.#delay = delay;
         this.#proxyHandler = { get: this.#get, set: this.#set };
     }
-
     #trigger = () => {
         if (this.#delay !== undefined) {
             clearTimeout(this.#timeout);
             this.#timeout = setTimeout(this.triggerCallbacks, this.#delay, this.#value);
-        } else
+        }
+        else
             this.triggerCallbacks(this.#value);
-    }
-
-    #get = <T>(target: T, key: PropertyKey, receiver: unknown) => {
-        const value = Reflect.get(target!, key, receiver);
+    };
+    #get = (target, key, receiver) => {
+        const value = Reflect.get(target, key, receiver);
         if (typeof value === "object" && value !== null)
-            return new Proxy(value!, this.#proxyHandler) as T;
+            return new Proxy(value, this.#proxyHandler);
         return value;
-    }
-
-    #set = <T, U>(target: T, key: PropertyKey, value: U, receiver?: unknown) => {
-        const currentValue = Reflect.get(target!, key, receiver);
+    };
+    #set = (target, key, value, receiver) => {
+        const currentValue = Reflect.get(target, key, receiver);
         if (currentValue !== value) {
-            const success = Reflect.set(target!, key, value, receiver);
+            const success = Reflect.set(target, key, value, receiver);
             if (success)
                 this.#trigger();
             return success;
-        } else
+        }
+        else
             return true;
-    }
-
+    };
 }
